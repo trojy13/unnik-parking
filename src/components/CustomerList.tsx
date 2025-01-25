@@ -15,10 +15,11 @@ interface Customer {
   payment: number;
   monthlyFee: number;
   discount: number;
+  discountType: 'percentage' | 'monthly' | 'total';
   parkingSpace: string;
   expiryDate: string;
   paymentDate: string;
-  paymentMethod: string;
+  paymentMethod: 'cash' | 'visa' | 'iris' | 'bank' | 'other';
   startDate: string;
   keyId: string;
 }
@@ -57,6 +58,8 @@ export const CustomerList: React.FC = () => {
         t('licensePlate'),
         t('payment'),
         t('monthlyFee'),
+        t('discount'),
+        t('discountType'),
         t('parkingSpace'),
         t('paymentDate'),
         t('startDate'),
@@ -68,6 +71,8 @@ export const CustomerList: React.FC = () => {
         customer.licensePlate,
         `€${customer.payment}`,
         `€${customer.monthlyFee}`,
+        customer.discount + (customer.discountType === 'percentage' ? '%' : '€'),
+        t(customer.discountType),
         customer.parkingSpace,
         customer.paymentDate,
         customer.startDate,
@@ -155,6 +160,10 @@ export const CustomerList: React.FC = () => {
               <div>
                 <p className="text-gray-500">{t('monthlyFee')}</p>
                 <p>€{customer.monthlyFee}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">{t('discount')}</p>
+                <p>{customer.discount}{customer.discountType === 'percentage' ? '%' : '€'}</p>
               </div>
               <div>
                 <p className="text-gray-500">{t('parkingSpace')}</p>

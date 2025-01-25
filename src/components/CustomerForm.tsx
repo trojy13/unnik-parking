@@ -19,6 +19,7 @@ interface CustomerFormData {
   payment: number;
   monthlyFee: number;
   discount: number;
+  discountType: 'percentage' | 'monthly' | 'total';
   parkingSpace: string;
   expiryDate: string;
   paymentDate: string;
@@ -46,6 +47,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
       payment: 0,
       monthlyFee: 0,
       discount: 0,
+      discountType: 'percentage',
       parkingSpace: '',
       paymentDate: format(new Date(), 'dd/MM/yyyy'),
       startDate: format(new Date(), 'dd/MM/yyyy'),
@@ -58,15 +60,28 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
   const payment = watch('payment');
   const monthlyFee = watch('monthlyFee');
   const startDate = watch('startDate');
+  const discount = watch('discount');
+  const discountType = watch('discountType');
 
   React.useEffect(() => {
     if (payment && monthlyFee && startDate) {
-      const months = Math.floor(payment / monthlyFee);
+      let effectiveMonthlyFee = monthlyFee;
+      
+      // Apply discount based on type
+      if (discountType === 'percentage') {
+        effectiveMonthlyFee = monthlyFee * (1 - discount / 100);
+      } else if (discountType === 'monthly') {
+        effectiveMonthlyFee = monthlyFee - discount;
+      } else if (discountType === 'total') {
+        effectiveMonthlyFee = monthlyFee - (discount / Math.floor(payment / monthlyFee));
+      }
+
+      const months = Math.floor(payment / effectiveMonthlyFee);
       const startDateObj = new Date(startDate.split('/').reverse().join('-'));
       const expiryDateObj = addMonths(startDateObj, months);
       setValue('expiryDate', format(expiryDateObj, 'dd/MM/yyyy'));
     }
-  }, [payment, monthlyFee, startDate, setValue]);
+  }, [payment, monthlyFee, startDate, discount, discountType, setValue]);
 
   return (
     <Card className="p-6">
@@ -109,6 +124,15 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
               step="0.01"
               {...register('discount', { required: true, min: 0 })}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('discountType')}</label>
+            <select {...register('discountType')} className="w-full border rounded-md p-2">
+              <option value="percentage">{t('percentage')}</option>
+              <option value="monthly">{t('monthlyAmount')}</option>
+              <option value="total">{t('totalAmount')}</option>
+            </select>
           </div>
 
           <div>
