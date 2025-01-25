@@ -4,6 +4,14 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useForm } from 'react-hook-form';
+import { format, addMonths } from 'date-fns';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface CustomerFormData {
   name: string;
@@ -13,6 +21,10 @@ interface CustomerFormData {
   discount: number;
   parkingSpace: string;
   expiryDate: string;
+  paymentDate: string;
+  paymentMethod: 'cash' | 'visa' | 'iris' | 'bank' | 'other';
+  startDate: string;
+  keyId: string;
 }
 
 interface CustomerFormProps {
@@ -27,7 +39,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
   initialData
 }) => {
   const { t } = useLanguage();
-  const { register, handleSubmit, formState: { errors } } = useForm<CustomerFormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CustomerFormData>({
     defaultValues: initialData || {
       name: '',
       licensePlate: '',
@@ -35,9 +47,26 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
       monthlyFee: 0,
       discount: 0,
       parkingSpace: '',
-      expiryDate: new Date().toISOString().split('T')[0]
+      paymentDate: format(new Date(), 'dd/MM/yyyy'),
+      startDate: format(new Date(), 'dd/MM/yyyy'),
+      expiryDate: format(new Date(), 'dd/MM/yyyy'),
+      paymentMethod: 'cash',
+      keyId: ''
     }
   });
+
+  const payment = watch('payment');
+  const monthlyFee = watch('monthlyFee');
+  const startDate = watch('startDate');
+
+  React.useEffect(() => {
+    if (payment && monthlyFee && startDate) {
+      const months = Math.floor(payment / monthlyFee);
+      const startDateObj = new Date(startDate.split('/').reverse().join('-'));
+      const expiryDateObj = addMonths(startDateObj, months);
+      setValue('expiryDate', format(expiryDateObj, 'dd/MM/yyyy'));
+    }
+  }, [payment, monthlyFee, startDate, setValue]);
 
   return (
     <Card className="p-6">
@@ -46,13 +75,13 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           <div>
             <label className="block text-sm font-medium mb-1">{t('name')}</label>
             <Input {...register('name', { required: true })} />
-            {errors.name && <p className="text-red-500 text-sm mt-1">Required</p>}
+            {errors.name && <p className="text-red-500 text-sm mt-1">{t('required')}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('licensePlate')}</label>
             <Input {...register('licensePlate', { required: true })} />
-            {errors.licensePlate && <p className="text-red-500 text-sm mt-1">Required</p>}
+            {errors.licensePlate && <p className="text-red-500 text-sm mt-1">{t('required')}</p>}
           </div>
 
           <div>
@@ -88,11 +117,34 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">{t('duration')}</label>
-            <Input
-              type="date"
-              {...register('expiryDate', { required: true })}
-            />
+            <label className="block text-sm font-medium mb-1">{t('paymentDate')}</label>
+            <Input {...register('paymentDate', { required: true })} placeholder="DD/MM/YYYY" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('startDate')}</label>
+            <Input {...register('startDate', { required: true })} placeholder="DD/MM/YYYY" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('expiryDate')}</label>
+            <Input {...register('expiryDate')} readOnly placeholder="DD/MM/YYYY" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('paymentMethod')}</label>
+            <select {...register('paymentMethod')} className="w-full border rounded-md p-2">
+              <option value="cash">{t('cash')}</option>
+              <option value="visa">{t('visa')}</option>
+              <option value="iris">{t('iris')}</option>
+              <option value="bank">{t('bank')}</option>
+              <option value="other">{t('other')}</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('keyId')}</label>
+            <Input {...register('keyId', { required: true })} />
           </div>
         </div>
 

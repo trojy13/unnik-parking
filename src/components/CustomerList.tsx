@@ -3,8 +3,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
-import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, FileDown } from 'lucide-react';
 import { CustomerForm } from './CustomerForm';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface Customer {
   id: string;
@@ -15,6 +17,10 @@ interface Customer {
   discount: number;
   parkingSpace: string;
   expiryDate: string;
+  paymentDate: string;
+  paymentMethod: string;
+  startDate: string;
+  keyId: string;
 }
 
 export const CustomerList: React.FC = () => {
@@ -42,6 +48,37 @@ export const CustomerList: React.FC = () => {
     setCustomers(customers.filter(c => c.id !== id));
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    autoTable(doc, {
+      head: [[
+        t('name'),
+        t('licensePlate'),
+        t('payment'),
+        t('monthlyFee'),
+        t('parkingSpace'),
+        t('paymentDate'),
+        t('startDate'),
+        t('expiryDate'),
+        t('keyId')
+      ]],
+      body: customers.map(customer => [
+        customer.name,
+        customer.licensePlate,
+        `€${customer.payment}`,
+        `€${customer.monthlyFee}`,
+        customer.parkingSpace,
+        customer.paymentDate,
+        customer.startDate,
+        customer.expiryDate,
+        customer.keyId
+      ]),
+    });
+
+    doc.save('customers.pdf');
+  };
+
   const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.licensePlate.toLowerCase().includes(searchTerm.toLowerCase())
@@ -59,10 +96,16 @@ export const CustomerList: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          {t('addNew')}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={exportToPDF} variant="outline" className="flex items-center gap-2">
+            <FileDown className="h-4 w-4" />
+            {t('exportPDF')}
+          </Button>
+          <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            {t('addNew')}
+          </Button>
+        </div>
       </div>
 
       {showForm && (
@@ -118,8 +161,20 @@ export const CustomerList: React.FC = () => {
                 <p>{customer.parkingSpace}</p>
               </div>
               <div>
-                <p className="text-gray-500">{t('expires')}</p>
-                <p>{new Date(customer.expiryDate).toLocaleDateString()}</p>
+                <p className="text-gray-500">{t('paymentMethod')}</p>
+                <p>{t(customer.paymentMethod)}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">{t('startDate')}</p>
+                <p>{customer.startDate}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">{t('expiryDate')}</p>
+                <p>{customer.expiryDate}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">{t('keyId')}</p>
+                <p>{customer.keyId}</p>
               </div>
             </div>
           </Card>
