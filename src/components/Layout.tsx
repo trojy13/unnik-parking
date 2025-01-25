@@ -1,32 +1,24 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from './ui/button';
-import { Globe } from 'lucide-react';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { language, setLanguage, t } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">{t('dashboard')}</h1>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">Park-Ease System</h1>
           <Button
-            variant="ghost"
-            size="sm"
             onClick={() => setLanguage(language === 'en' ? 'el' : 'en')}
-            className="flex items-center gap-2"
+            variant="outline"
           >
-            <Globe className="h-4 w-4" />
-            {language === 'en' ? 'Ελληνικά' : 'English'}
+            {t('language')}: {language.toUpperCase()}
           </Button>
         </div>
       </header>
-      <main className="container mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {children}
       </main>
     </div>
