@@ -26,7 +26,18 @@ export const translations = {
     edit: "Edit",
     delete: "Delete",
     exportPDF: "Export to PDF",
-    language: "Language"
+    language: "Language",
+    viewMode: "View Mode",
+    cards: "Cards",
+    table: "Table",
+    ascending: "Ascending",
+    descending: "Descending",
+    sortBy: "Sort by",
+    search: "Search",
+    addNew: "Add New",
+    noCustomers: "No customers found",
+    cancel: "Cancel",
+    save: "Save"
   },
   el: {
     customers: "Πελάτες",
@@ -55,7 +66,18 @@ export const translations = {
     edit: "Επεξεργασία",
     delete: "Διαγραφή",
     exportPDF: "Εξαγωγή σε PDF",
-    language: "Γλώσσα"
+    language: "Γλώσσα",
+    viewMode: "Τύπος Προβολής",
+    cards: "Κάρτες",
+    table: "Πίνακας",
+    ascending: "Αύξουσα",
+    descending: "Φθίνουσα",
+    sortBy: "Ταξινόμηση κατά",
+    search: "Αναζήτηση",
+    addNew: "Προσθήκη",
+    noCustomers: "Δεν βρέθηκαν πελάτες",
+    cancel: "Ακύρωση",
+    save: "Αποθήκευση"
   }
 };
 
