@@ -4,22 +4,13 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { useForm } from 'react-hook-form';
-import { format, addMonths } from 'date-fns';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import { format, addMonths, parse } from 'date-fns';
 
 interface CustomerFormData {
   name: string;
   licensePlate: string;
   payment: number;
   monthlyFee: number;
-  discount: number;
-  discountType: 'percentage' | 'monthly' | 'total';
   parkingSpace: string;
   expiryDate: string;
   paymentDate: string;
@@ -46,8 +37,6 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
       licensePlate: '',
       payment: 0,
       monthlyFee: 0,
-      discount: 0,
-      discountType: 'percentage',
       parkingSpace: '',
       paymentDate: format(new Date(), 'dd/MM/yyyy'),
       startDate: format(new Date(), 'dd/MM/yyyy'),
@@ -60,28 +49,19 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
   const payment = watch('payment');
   const monthlyFee = watch('monthlyFee');
   const startDate = watch('startDate');
-  const discount = watch('discount');
-  const discountType = watch('discountType');
 
   React.useEffect(() => {
     if (payment && monthlyFee && startDate) {
-      let effectiveMonthlyFee = monthlyFee;
-      
-      // Apply discount based on type
-      if (discountType === 'percentage') {
-        effectiveMonthlyFee = monthlyFee * (1 - discount / 100);
-      } else if (discountType === 'monthly') {
-        effectiveMonthlyFee = monthlyFee - discount;
-      } else if (discountType === 'total') {
-        effectiveMonthlyFee = monthlyFee - (discount / Math.floor(payment / monthlyFee));
+      try {
+        const startDateObj = parse(startDate, 'dd/MM/yyyy', new Date());
+        const months = Math.floor(payment / monthlyFee);
+        const expiryDateObj = addMonths(startDateObj, months);
+        setValue('expiryDate', format(expiryDateObj, 'dd/MM/yyyy'));
+      } catch (error) {
+        console.error('Date parsing error:', error);
       }
-
-      const months = Math.floor(payment / effectiveMonthlyFee);
-      const startDateObj = new Date(startDate.split('/').reverse().join('-'));
-      const expiryDateObj = addMonths(startDateObj, months);
-      setValue('expiryDate', format(expiryDateObj, 'dd/MM/yyyy'));
     }
-  }, [payment, monthlyFee, startDate, discount, discountType, setValue]);
+  }, [payment, monthlyFee, startDate, setValue]);
 
   return (
     <Card className="p-6">
@@ -89,14 +69,14 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">{t('name')}</label>
-            <Input {...register('name', { required: true })} />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{t('required')}</p>}
+            <Input {...register('name')} />
+            {errors.name && <p className="text-red-500 text-sm mt-1">{t('name')}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('licensePlate')}</label>
-            <Input {...register('licensePlate', { required: true })} />
-            {errors.licensePlate && <p className="text-red-500 text-sm mt-1">{t('required')}</p>}
+            <Input {...register('licensePlate')} />
+            {errors.licensePlate && <p className="text-red-500 text-sm mt-1">{t('licensePlate')}</p>}
           </div>
 
           <div>
@@ -104,7 +84,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             <Input
               type="number"
               step="0.01"
-              {...register('payment', { required: true, min: 0 })}
+              {...register('payment', { min: 0 })}
             />
           </div>
 
@@ -113,41 +93,23 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             <Input
               type="number"
               step="0.01"
-              {...register('monthlyFee', { required: true, min: 0 })}
+              {...register('monthlyFee', { min: 0 })}
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">{t('discount')}</label>
-            <Input
-              type="number"
-              step="0.01"
-              {...register('discount', { required: true, min: 0 })}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">{t('discountType')}</label>
-            <select {...register('discountType')} className="w-full border rounded-md p-2">
-              <option value="percentage">{t('percentage')}</option>
-              <option value="monthly">{t('monthlyAmount')}</option>
-              <option value="total">{t('totalAmount')}</option>
-            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('parkingSpace')}</label>
-            <Input {...register('parkingSpace', { required: true })} />
+            <Input {...register('parkingSpace')} />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('paymentDate')}</label>
-            <Input {...register('paymentDate', { required: true })} placeholder="DD/MM/YYYY" />
+            <Input {...register('paymentDate')} placeholder="DD/MM/YYYY" />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('startDate')}</label>
-            <Input {...register('startDate', { required: true })} placeholder="DD/MM/YYYY" />
+            <Input {...register('startDate')} placeholder="DD/MM/YYYY" />
           </div>
 
           <div>
@@ -168,7 +130,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('keyId')}</label>
-            <Input {...register('keyId', { required: true })} />
+            <Input {...register('keyId')} />
           </div>
         </div>
 
