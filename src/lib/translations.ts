@@ -6,11 +6,6 @@ export const translations = {
     licensePlate: "License Plate",
     payment: "Payment",
     monthlyFee: "Monthly Fee",
-    discount: "Discount",
-    discountType: "Discount Type",
-    percentage: "Percentage",
-    monthlyAmount: "Monthly Amount",
-    totalAmount: "Total Amount",
     parkingSpace: "Parking Space",
     paymentDate: "Payment Date",
     startDate: "Start Date",
@@ -37,7 +32,8 @@ export const translations = {
     addNew: "Add New",
     noCustomers: "No customers found",
     cancel: "Cancel",
-    save: "Save"
+    save: "Save",
+    actions: "Actions"
   },
   el: {
     customers: "Πελάτες",
@@ -46,11 +42,6 @@ export const translations = {
     licensePlate: "Πινακίδα",
     payment: "Πληρωμή",
     monthlyFee: "Μηνιαίο Μίσθωμα",
-    discount: "Έκπτωση",
-    discountType: "Τύπος Έκπτωσης",
-    percentage: "Ποσοστό",
-    monthlyAmount: "Μηνιαίο Ποσό",
-    totalAmount: "Συνολικό Ποσό",
     parkingSpace: "Θέση Στάθμευσης",
     paymentDate: "Ημερομηνία Πληρωμής",
     startDate: "Ημερομηνία Έναρξης",
@@ -77,7 +68,8 @@ export const translations = {
     addNew: "Προσθήκη",
     noCustomers: "Δεν βρέθηκαν πελάτες",
     cancel: "Ακύρωση",
-    save: "Αποθήκευση"
+    save: "Αποθήκευση",
+    actions: "Ενέργειες"
   }
 };
 
