@@ -3,11 +3,14 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
+import { Textarea } from './ui/textarea';
 import { useForm } from 'react-hook-form';
 import { format, addMonths, parse } from 'date-fns';
 
 interface CustomerFormData {
   name: string;
+  carType: string;
+  carSize: 'small' | 'medium' | 'big';
   licensePlate: string;
   payment: number;
   monthlyFee: number;
@@ -17,6 +20,9 @@ interface CustomerFormData {
   paymentMethod: 'cash' | 'visa' | 'iris' | 'bank' | 'other';
   startDate: string;
   keyId: string;
+  notes: string;
+  phone: string;
+  email: string;
 }
 
 interface CustomerFormProps {
@@ -34,6 +40,8 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CustomerFormData>({
     defaultValues: initialData || {
       name: '',
+      carType: '',
+      carSize: 'medium',
       licensePlate: '',
       payment: 0,
       monthlyFee: 0,
@@ -42,7 +50,10 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
       startDate: format(new Date(), 'dd/MM/yyyy'),
       expiryDate: format(new Date(), 'dd/MM/yyyy'),
       paymentMethod: 'cash',
-      keyId: ''
+      keyId: '',
+      notes: '',
+      phone: '',
+      email: ''
     }
   });
 
@@ -70,13 +81,25 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           <div>
             <label className="block text-sm font-medium mb-1">{t('name')}</label>
             <Input {...register('name')} />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{t('name')}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('carType')}</label>
+            <Input {...register('carType')} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('carSize')}</label>
+            <select {...register('carSize')} className="w-full border rounded-md p-2">
+              <option value="small">{t('small')}</option>
+              <option value="medium">{t('medium')}</option>
+              <option value="big">{t('big')}</option>
+            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('licensePlate')}</label>
             <Input {...register('licensePlate')} />
-            {errors.licensePlate && <p className="text-red-500 text-sm mt-1">{t('licensePlate')}</p>}
           </div>
 
           <div>
@@ -114,7 +137,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">{t('expiryDate')}</label>
-            <Input {...register('expiryDate')} readOnly placeholder="DD/MM/YYYY" />
+            <Input {...register('expiryDate')} placeholder="DD/MM/YYYY" />
           </div>
 
           <div>
@@ -132,6 +155,21 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             <label className="block text-sm font-medium mb-1">{t('keyId')}</label>
             <Input {...register('keyId')} />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('phone')}</label>
+            <Input {...register('phone')} type="tel" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">{t('email')}</label>
+            <Input {...register('email')} type="email" />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">{t('notes')}</label>
+          <Textarea {...register('notes')} className="min-h-[100px]" />
         </div>
 
         <div className="flex justify-end gap-2">

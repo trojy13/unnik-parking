@@ -3,6 +3,11 @@ export const translations = {
     customers: "Customers",
     addCustomer: "Add Customer",
     name: "Name",
+    carType: "Car Type",
+    carSize: "Car Size",
+    small: "Small",
+    medium: "Medium",
+    big: "Big",
     licensePlate: "License Plate",
     payment: "Payment",
     monthlyFee: "Monthly Fee",
@@ -12,6 +17,9 @@ export const translations = {
     expiryDate: "Expiry Date",
     paymentMethod: "Payment Method",
     keyId: "Key ID",
+    notes: "Notes",
+    phone: "Phone Number",
+    email: "Email",
     cash: "Cash",
     visa: "Visa",
     iris: "Iris",
@@ -21,6 +29,7 @@ export const translations = {
     edit: "Edit",
     delete: "Delete",
     exportPDF: "Export to PDF",
+    exportExcel: "Export to Excel",
     language: "Language",
     viewMode: "View Mode",
     cards: "Cards",
@@ -33,12 +42,18 @@ export const translations = {
     noCustomers: "No customers found",
     cancel: "Cancel",
     save: "Save",
-    actions: "Actions"
+    actions: "Actions",
+    transactions: "Transactions"
   },
   el: {
     customers: "Πελάτες",
     addCustomer: "Προσθήκη Πελάτη",
     name: "Όνομα",
+    carType: "Τύπος Αυτοκινήτου",
+    carSize: "Μέγεθος Αυτοκινήτου",
+    small: "Μικρό",
+    medium: "Μεσαίο",
+    big: "Μεγάλο",
     licensePlate: "Πινακίδα",
     payment: "Πληρωμή",
     monthlyFee: "Μηνιαίο Μίσθωμα",
@@ -48,6 +63,9 @@ export const translations = {
     expiryDate: "Ημερομηνία Λήξης",
     paymentMethod: "Τρόπος Πληρωμής",
     keyId: "Κωδικός Κλειδιού",
+    notes: "Σημειώσεις",
+    phone: "Τηλέφωνο",
+    email: "Email",
     cash: "Μετρητά",
     visa: "Visa",
     iris: "Iris",
@@ -57,6 +75,7 @@ export const translations = {
     edit: "Επεξεργασία",
     delete: "Διαγραφή",
     exportPDF: "Εξαγωγή σε PDF",
+    exportExcel: "Εξαγωγή σε Excel",
     language: "Γλώσσα",
     viewMode: "Τύπος Προβολής",
     cards: "Κάρτες",
@@ -69,7 +88,8 @@ export const translations = {
     noCustomers: "Δεν βρέθηκαν πελάτες",
     cancel: "Ακύρωση",
     save: "Αποθήκευση",
-    actions: "Ενέργειες"
+    actions: "Ενέργειες",
+    transactions: "Συναλλαγές"
   }
 };
 

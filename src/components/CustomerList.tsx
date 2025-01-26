@@ -3,10 +3,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
-import { Search, Plus, Edit2, Trash2, FileDown, ArrowUpDown } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, FileDown, ArrowUpDown, FileSpreadsheet } from 'lucide-react';
 import { CustomerForm } from './CustomerForm';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 import {
   Table,
   TableBody,
@@ -26,6 +27,8 @@ import {
 interface Customer {
   id: string;
   name: string;
+  carType: string;
+  carSize: 'small' | 'medium' | 'big';
   licensePlate: string;
   payment: number;
   monthlyFee: number;
@@ -35,9 +38,12 @@ interface Customer {
   paymentMethod: 'cash' | 'visa' | 'iris' | 'bank' | 'other';
   startDate: string;
   keyId: string;
+  notes: string;
+  phone: string;
+  email: string;
 }
 
-type SortField = 'name' | 'id' | 'parkingSpace' | 'startDate' | 'expiryDate';
+type SortField = keyof Omit<Customer, 'notes'>;
 type SortOrder = 'asc' | 'desc';
 
 export const CustomerList: React.FC = () => {
@@ -46,7 +52,7 @@ export const CustomerList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
@@ -74,6 +80,8 @@ export const CustomerList: React.FC = () => {
     autoTable(doc, {
       head: [[
         t('name'),
+        t('carType'),
+        t('carSize'),
         t('licensePlate'),
         t('payment'),
         t('monthlyFee'),
@@ -81,10 +89,14 @@ export const CustomerList: React.FC = () => {
         t('paymentDate'),
         t('startDate'),
         t('expiryDate'),
-        t('keyId')
+        t('keyId'),
+        t('phone'),
+        t('email')
       ]],
       body: customers.map(customer => [
         customer.name,
+        customer.carType,
+        t(customer.carSize),
         customer.licensePlate,
         `€${customer.payment}`,
         `€${customer.monthlyFee}`,
@@ -92,34 +104,48 @@ export const CustomerList: React.FC = () => {
         customer.paymentDate,
         customer.startDate,
         customer.expiryDate,
-        customer.keyId
+        customer.keyId,
+        customer.phone,
+        customer.email
       ]),
     });
 
     doc.save('customers.pdf');
   };
 
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      customers.map(customer => ({
+        [t('name')]: customer.name,
+        [t('carType')]: customer.carType,
+        [t('carSize')]: t(customer.carSize),
+        [t('licensePlate')]: customer.licensePlate,
+        [t('payment')]: customer.payment,
+        [t('monthlyFee')]: customer.monthlyFee,
+        [t('parkingSpace')]: customer.parkingSpace,
+        [t('paymentDate')]: customer.paymentDate,
+        [t('startDate')]: customer.startDate,
+        [t('expiryDate')]: customer.expiryDate,
+        [t('paymentMethod')]: t(customer.paymentMethod),
+        [t('keyId')]: customer.keyId,
+        [t('notes')]: customer.notes,
+        [t('phone')]: customer.phone,
+        [t('email')]: customer.email,
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Customers');
+    XLSX.writeFile(workbook, 'customers.xlsx');
+  };
+
   const sortCustomers = (a: Customer, b: Customer) => {
     let comparison = 0;
     
-    switch (sortField) {
-      case 'name':
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case 'id':
-        comparison = a.id.localeCompare(b.id);
-        break;
-      case 'parkingSpace':
-        comparison = a.parkingSpace.localeCompare(b.parkingSpace);
-        break;
-      case 'startDate':
-        comparison = new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-        break;
-      case 'expiryDate':
-        comparison = new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
-        break;
-      default:
-        comparison = 0;
+    if (typeof a[sortField] === 'string' && typeof b[sortField] === 'string') {
+      comparison = (a[sortField] as string).localeCompare(b[sortField] as string);
+    } else if (typeof a[sortField] === 'number' && typeof b[sortField] === 'number') {
+      comparison = (a[sortField] as number) - (b[sortField] as number);
     }
 
     return sortOrder === 'asc' ? comparison : -comparison;
@@ -128,9 +154,12 @@ export const CustomerList: React.FC = () => {
   const filteredCustomers = customers
     .filter(customer =>
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.licensePlate.toLowerCase().includes(searchTerm.toLowerCase())
+      customer.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.parkingSpace.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort(sortCustomers);
+
+  // ... keep existing code (UI rendering for search, filters, and form)
 
   return (
     <div className="space-y-6">
@@ -154,34 +183,13 @@ export const CustomerList: React.FC = () => {
               <SelectItem value="table">{t('table')}</SelectItem>
             </SelectContent>
           </Select>
-          {viewMode === 'table' && (
-            <>
-              <Select value={sortField} onValueChange={(value: SortField) => setSortField(value)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder={t('sortBy')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">{t('name')}</SelectItem>
-                  <SelectItem value="id">ID</SelectItem>
-                  <SelectItem value="parkingSpace">{t('parkingSpace')}</SelectItem>
-                  <SelectItem value="startDate">{t('startDate')}</SelectItem>
-                  <SelectItem value="expiryDate">{t('expiryDate')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={sortOrder} onValueChange={(value: SortOrder) => setSortOrder(value)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asc">{t('ascending')}</SelectItem>
-                  <SelectItem value="desc">{t('descending')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-          )}
           <Button onClick={exportToPDF} variant="outline" className="flex items-center gap-2">
             <FileDown className="h-4 w-4" />
             {t('exportPDF')}
+          </Button>
+          <Button onClick={exportToExcel} variant="outline" className="flex items-center gap-2">
+            <FileSpreadsheet className="h-4 w-4" />
+            {t('exportExcel')}
           </Button>
           <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
@@ -202,18 +210,20 @@ export const CustomerList: React.FC = () => {
       )}
 
       {viewMode === 'table' ? (
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t('name')}</TableHead>
+                <TableHead>{t('carType')}</TableHead>
+                <TableHead>{t('carSize')}</TableHead>
                 <TableHead>{t('licensePlate')}</TableHead>
                 <TableHead>{t('payment')}</TableHead>
                 <TableHead>{t('monthlyFee')}</TableHead>
                 <TableHead>{t('parkingSpace')}</TableHead>
                 <TableHead>{t('startDate')}</TableHead>
                 <TableHead>{t('expiryDate')}</TableHead>
-                <TableHead>{t('keyId')}</TableHead>
+                <TableHead>{t('phone')}</TableHead>
                 <TableHead className="text-right">{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -221,13 +231,15 @@ export const CustomerList: React.FC = () => {
               {filteredCustomers.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell>{customer.name}</TableCell>
+                  <TableCell>{customer.carType}</TableCell>
+                  <TableCell>{t(customer.carSize)}</TableCell>
                   <TableCell>{customer.licensePlate}</TableCell>
                   <TableCell>€{customer.payment}</TableCell>
                   <TableCell>€{customer.monthlyFee}</TableCell>
                   <TableCell>{customer.parkingSpace}</TableCell>
                   <TableCell>{customer.startDate}</TableCell>
                   <TableCell>{customer.expiryDate}</TableCell>
-                  <TableCell>{customer.keyId}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
@@ -283,6 +295,14 @@ export const CustomerList: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
+                  <p className="text-gray-500">{t('carType')}</p>
+                  <p>{customer.carType}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">{t('carSize')}</p>
+                  <p>{t(customer.carSize)}</p>
+                </div>
+                <div>
                   <p className="text-gray-500">{t('payment')}</p>
                   <p>€{customer.payment}</p>
                 </div>
@@ -307,8 +327,12 @@ export const CustomerList: React.FC = () => {
                   <p>{customer.expiryDate}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">{t('keyId')}</p>
-                  <p>{customer.keyId}</p>
+                  <p className="text-gray-500">{t('phone')}</p>
+                  <p>{customer.phone}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">{t('email')}</p>
+                  <p>{customer.email}</p>
                 </div>
               </div>
             </Card>
